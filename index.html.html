@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Workout"/>
+  <meta name="theme-color" content="#0f1f35"/>
+  <title>Home Workout — Julien</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f0eb;min-height:100vh;}
+    button{font-family:inherit;cursor:pointer;}
+    input{font-family:inherit;}
+    .safe-top{padding-top:env(safe-area-inset-top);}
+    .safe-bot{padding-bottom:env(safe-area-inset-bottom);}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+const {useState,useEffect,useCallback}=React;
+
+const SEANCES_M1=[{id:"A",jour:"LUNDI",titre:"Haut du corps — Poussée",focus:"Pectoraux · Épaules · Triceps",couleur:"#1a3a5c",light:"#e8f0fa",warmup:["Rotations d'épaules × 15 (chaque sens)","Cercles de bras croisés × 10","Pompes genoux lentes × 10","Mobilisation thoracique chat-vache × 10"],exercices:[{nom:"Pompes classiques",materiel:"Sol / poignées de pompe",muscles:"Pectoraux, triceps, avant épaules",posture:"Corps aligné tête-talons, abdos gainés, coudes à 45° du corps. Descendre la poitrine à 2-3 cm du sol lentement (3 sec), pousser en explosif. Ton niveau : 25 pompes → viser 4×10-12 propres.",series:4,reps:"10-12",repos:"90s"},{nom:"Dips à la barre",materiel:"Barre dips Eric Flag",muscles:"Triceps, bas pectoraux, épaules",posture:"Mains sur les barres, corps légèrement incliné vers l'avant (15°). Descendre jusqu'à 90° aux coudes, pas plus. Contrôler la descente 3 sec. Ton niveau : 10 dips → viser 3×6-8 contrôlés.",series:3,reps:"6-8",repos:"90s"},{nom:"Développé épaules élastique",materiel:"Élastique Eric Flag rouge/noir (5-16 kg)",muscles:"Deltoïdes, trapèzes, triceps",posture:"Debout, un pied sur l'élastique, poignées à hauteur des épaules. Pousser verticalement sans cambrer le bas du dos. Core engagé pendant tout le mouvement.",series:3,reps:"10-12",repos:"75s"},{nom:"Pompes pike",materiel:"Sol",muscles:"Deltoïdes antérieurs, triceps",posture:"Position en V inversé, hanches hautes, mains à largeur d'épaules. Descendre la tête vers le sol entre les mains en contrôlant (2 sec). Excellent pour les épaules sans charge axiale.",series:3,reps:"10",repos:"75s"},{nom:"Élévations latérales haltères",materiel:"2 haltères 10 kg",muscles:"Deltoïdes latéraux",posture:"Debout, légère flexion des coudes. Monter les bras à l'horizontale, contrôler la descente 3 sec. Ne pas hausser les épaules. Poids léger = technique parfaite.",series:3,reps:"12",repos:"60s"}]},{id:"B",jour:"MARDI",titre:"Bas du corps + Core",focus:"Quadriceps · Fessiers · Ischios · Lombaires",couleur:"#2e7d52",light:"#e6f4ec",warmup:["Tours de hanches × 15 (chaque sens)","Fentes latérales lentes × 10","Pont fessier au sol × 20","Genoux poitrine allongé × 10"],exercices:[{nom:"Squat avec kit SmartWorkout",materiel:"Kit SmartWorkout (barre + élastiques)",muscles:"Quadriceps, fessiers, ischios",posture:"Barre SmartWorkout sur les épaules (trapèzes), élastiques sous les pieds. Pieds largeur épaules, orteils légèrement ouverts. Descendre cuisses parallèles au sol, DOS NEUTRE obligatoire. Pousser sur les talons pour remonter.",series:4,reps:"10-12",repos:"90s"},{nom:"Fentes avant SmartWorkout",materiel:"Kit SmartWorkout (barre + élastiques)",muscles:"Quadriceps, fessiers, ischios",posture:"Barre sur les épaules, élastiques sous le pied avant. Genou arrière effleure le sol, genou avant ne dépasse pas le bout du pied. Buste droit, regard devant. Alterner les jambes.",series:3,reps:"10 par jambe",repos:"90s"},{nom:"Pont fessier SmartWorkout",materiel:"Kit SmartWorkout (barre sur le bassin)",muscles:"Fessiers, ischios, lombaires en douceur",posture:"Allongé sur le dos, genoux fléchis, pieds à plat, barre SmartWorkout posée sur le bassin. Pousser les hanches vers le haut, serrer les fessiers 2 sec en haut. Pas de cambrure excessive.",series:4,reps:"15",repos:"60s"},{nom:"Gainage planche avant",materiel:"Sol",muscles:"Transverse, obliques, érecteurs du rachis",posture:"Avant-bras au sol, corps aligné tête-talons. Abdos contractés, dos plat, pas de chute des hanches. Ton niveau : 1 min → viser 3×45s en mois 1 avec forme parfaite.",series:3,reps:"45 secondes",repos:"60s"},{nom:"Dead bug",materiel:"Sol",muscles:"Core profond, stabilisateurs lombaires",posture:"Sur le dos, bras tendus vers le plafond, genoux à 90°. Descendre bras droit + jambe gauche simultanément près du sol (sans le toucher) en expirant lentement. Revenir et alterner. Dos plat PENDANT TOUT LE MOUVEMENT.",series:3,reps:"8 par côté",repos:"60s"}]},{id:"C",jour:"JEUDI",titre:"Haut du corps — Tirage",focus:"Dorsaux · Biceps · Rhomboïdes · Trapèzes",couleur:"#5a2d82",light:"#f0e8fa",warmup:["Rotations d'épaules vers l'arrière × 15","Ouvertures de bras (eagle stretch) × 10","Suspension passive à la barre 20 secondes","Face pull élastique léger × 15"],exercices:[{nom:"Tractions assistées élastique",materiel:"Barre Eric Flag 2.0 + élastique bleu/blanc (25-65 kg)",muscles:"Grand dorsal, biceps, rhomboïdes",posture:"Prise pronation, légèrement plus large que les épaules. Élastique passé sous les genoux pour alléger. Tirer en ramenant les coudes vers les hanches, poitrine vers la barre. Contrôler la descente 3 sec.",series:4,reps:"6-8",repos:"120s"},{nom:"Rowing aux anneaux",materiel:"Anneaux de gymnastique bois",muscles:"Dorsaux, biceps, rhomboïdes, arrière épaules",posture:"Anneaux réglés à hauteur de poitrine, corps incliné à ~45°. Tirer les anneaux vers la poitrine, coudes vers les hanches. Corps rigide. Plus tu t'inclines horizontalement, plus c'est difficile. Commencer à 45°.",series:4,reps:"10-12",repos:"75s"},{nom:"Face pull élastique",materiel:"Élastique Eric Flag rouge/noir fixé à la barre",muscles:"Trapèzes, deltoïdes postérieurs, rotateurs externes",posture:"Debout légèrement en retrait de la barre, tirer l'élastique vers le visage en écartant les coudes en W. Mouvement essentiel pour la santé des épaules et la posture au bureau.",series:3,reps:"15",repos:"60s"},{nom:"Rowing haltère unilatéral",materiel:"1 haltère 10 kg + appui chaise",muscles:"Grand dorsal, biceps, trapèze moyen",posture:"Genou et main d'appui sur la chaise, dos parallèle au sol et NEUTRE. Tirer l'haltère vers la hanche. Coude rasant le corps. Contrôler la descente 2 sec.",series:3,reps:"10-12 par bras",repos:"75s"},{nom:"Curl biceps haltères",materiel:"2 haltères 10 kg",muscles:"Biceps, brachial antérieur",posture:"Debout, coudes collés au corps. Monter en supination (paume vers le haut), contrôler la descente 3 sec. Ne pas balancer le buste. Si trop lourd, alterner un bras à la fois.",series:3,reps:"10-12",repos:"60s"}]},{id:"D",jour:"SAMEDI",titre:"Full Body — Fonctionnel",focus:"Corps entier · Enchaînements · Endurance",couleur:"#8b3a1a",light:"#faeae6",warmup:["Jumping jacks × 30 secondes","Course sur place × 30 secondes","Squats à vide × 15","Rotations complètes des bras × 10"],exercices:[{nom:"Squat goblet haltère",materiel:"1 haltère 10 kg tenu à deux mains",muscles:"Quadriceps, fessiers, ischios",posture:"Haltère tenu verticalement contre la poitrine. Pieds largeur épaules, orteils légèrement ouverts. Descendre cuisses parallèles au sol, DOS NEUTRE. Pousser sur les talons.",series:3,reps:"12",repos:"75s"},{nom:"Pompes + rotation T",materiel:"Sol",muscles:"Pectoraux, épaules, obliques, stabilisateurs",posture:"Après chaque pompe, rotation du buste et lever un bras vers le plafond (T). Alterner droite-gauche. Core très engagé pour protéger le bas du dos. Aller lentement.",series:3,reps:"6 de chaque côté",repos:"75s"},{nom:"Tractions prise supination (chin-up)",materiel:"Barre Eric Flag 2.0",muscles:"Biceps, grand dorsal",posture:"Prise en supination (paumes vers soi), largeur d'épaules. Tirer en cherchant à amener le menton au-dessus de la barre. Descente contrôlée 3 sec. Plus accessible que la prise pronation.",series:3,reps:"Max propre (min. 3)",repos:"120s"},{nom:"Leg curl debout SmartWorkout",materiel:"Kit SmartWorkout (élastique fixé bas)",muscles:"Ischios, fessiers",posture:"Debout face à l'ancrage, élastique SmartWorkout fixé à la cheville. Fléchir le genou en amenant le talon vers les fessiers. Hanche stable. Alterner les jambes.",series:3,reps:"12 par jambe",repos:"60s"},{nom:"Planche complexe",materiel:"Sol",muscles:"Core complet, lombaires, obliques",posture:"30s planche avant → 20s planche latérale droite → 20s planche latérale gauche, sans pause. Hanches alignées. Fin de semaine.",series:3,reps:"1 tour (70 sec)",repos:"75s"}]}];
+
+const SEANCES_M2=[{id:"A",jour:"LUNDI",titre:"Haut du corps — Poussée (Intensifié)",focus:"Pectoraux · Épaules · Triceps · Plus de charge",couleur:"#1a3a5c",light:"#e8f0fa",warmup:["Rotations d'épaules × 15","Face pull élastique léger × 15","Pompes genoux lentes × 10","Mobilisation thoracique × 10"],exercices:[{nom:"Pompes pieds surélevés (déclinées)",materiel:"Sol + chaise (30-40 cm)",muscles:"Pectoraux supérieurs, triceps, avant épaules",posture:"Pieds sur la chaise, mains au sol largeur épaules. Corps aligné. Descendre la poitrine entre les mains lentement (3 sec). Progression naturelle depuis les pompes classiques du mois 1.",series:4,reps:"8-10",repos:"90s"},{nom:"Dips lestés ou volume augmenté",materiel:"Barre dips Eric Flag",muscles:"Triceps, bas pectoraux, épaules",posture:"Si 10 dips propres sont faciles : ajouter un sac à dos lesté ou viser 4×10. Même technique : inclinaison légère vers l'avant, descente contrôlée à 90°, pas plus bas.",series:4,reps:"8-10",repos:"90s"},{nom:"Développé épaules haltères assis",materiel:"2 haltères 10 kg",muscles:"Deltoïdes, trapèzes, triceps",posture:"Assis sur une chaise, dos appuyé, haltères à hauteur des oreilles. Pousser verticalement. Contrôler la descente 3 sec. NE PAS cambrer le bas du dos — caler le dos contre le dossier.",series:4,reps:"10",repos:"90s"},{nom:"Pompes avec élastique résistant",materiel:"Élastique Eric Flag rouge/noir dans le dos",muscles:"Pectoraux, triceps, épaules",posture:"Passer l'élastique dans le dos sous les aisselles, tenir les extrémités dans les paumes. La résistance augmente à l'extension. Corps aligné.",series:3,reps:"8",repos:"90s"},{nom:"Élévations latérales + frontales alternées",materiel:"2 haltères 10 kg",muscles:"Deltoïdes antérieurs et latéraux",posture:"Debout : alterner élévation frontale bras droit et élévation latérale bras gauche. Légère flexion des coudes. Contrôle total, pas d'élan.",series:3,reps:"10 par côté",repos:"60s"}]},{id:"B",jour:"MARDI",titre:"Bas du corps + Core (Progression)",focus:"Plus de charge · Unilatéral · Gainage dynamique",couleur:"#2e7d52",light:"#e6f4ec",warmup:["Tours de hanches × 20","Fentes latérales lentes × 12","Pont fessier × 20","Bird-dog × 10 par côté"],exercices:[{nom:"Squat bulgare SmartWorkout",materiel:"Kit SmartWorkout + chaise",muscles:"Quadriceps, fessiers, ischios",posture:"Pied arrière sur la chaise, pied avant à 60 cm. Barre SmartWorkout sur les épaules, élastiques sous le pied avant. Descendre le genou arrière vers le sol. Buste droit. Effort unilatéral protège le dos.",series:4,reps:"8 par jambe",repos:"90s"},{nom:"Romanian deadlift haltères (RDL)",materiel:"2 haltères 10 kg",muscles:"Ischios, fessiers, érecteurs du rachis",posture:"Debout, haltères devant les cuisses, légère flexion des genoux. Incliner le buste en laissant glisser les haltères le long des jambes, DOS ABSOLUMENT NEUTRE. Revenir en contractant les fessiers. Ne jamais arrondir le dos.",series:4,reps:"10-12",repos:"90s"},{nom:"Hip thrust SmartWorkout",materiel:"Kit SmartWorkout + chaise",muscles:"Fessiers, ischios",posture:"Épaules sur la chaise, pieds à plat, barre SmartWorkout sur le bassin (coussin optionnel). Pousser les hanches vers le haut jusqu'à alignement corps, serrer les fessiers 2 sec en haut.",series:4,reps:"12-15",repos:"75s"},{nom:"Planche avec toucher d'épaule",materiel:"Sol",muscles:"Core, anti-rotation, stabilisateurs lombaires",posture:"Planche sur les mains (bras tendus). Toucher l'épaule opposée avec la main sans bouger les hanches. Très lent et contrôlé. Excellent anti-rotation pour le dos.",series:3,reps:"10 par côté",repos:"60s"},{nom:"Pallof press élastique",materiel:"Élastique Eric Flag rouge/noir (ancrage latéral à la barre)",muscles:"Core, anti-rotation, transverse",posture:"Debout de côté par rapport à l'ancrage, tenir l'élastique à deux mains à hauteur du sternum. Tendre les bras devant soi et revenir LENTEMENT. Le corps résiste à la rotation. L'un des meilleurs exercices pour protéger les lombaires.",series:3,reps:"10 par côté",repos:"60s"}]},{id:"C",jour:"JEUDI",titre:"Haut du corps — Tirage (Progression)",focus:"Dorsaux · Biceps · Volume augmenté",couleur:"#5a2d82",light:"#f0e8fa",warmup:["Suspension passive barre 20 sec","Scapular pulls (rétractions omoplates) × 10","Face pull élastique × 15","Flexions-extensions libres des coudes × 15"],exercices:[{nom:"Tractions sans assistance (ou réduite)",materiel:"Barre Eric Flag 2.0 + élastique bleu/jaune si besoin (12-32 kg)",muscles:"Grand dorsal, biceps, rhomboïdes",posture:"Progression du mois 1 : tenter sans élastique. Si 5+ tractions propres → faire 4×5 sans aide puis finir avec élastique léger. Négatifs : monter avec élan, descendre en 5 sec.",series:4,reps:"5-8",repos:"120s"},{nom:"Rowing anneaux (plus horizontal)",materiel:"Anneaux de gymnastique bois",muscles:"Dorsaux, biceps, rhomboïdes, arrière épaules",posture:"Corps plus incliné qu'au mois 1 (viser 20-30° du sol). Tirer les anneaux vers la poitrine, rotation naturelle des anneaux vers l'extérieur en haut du mouvement. Corps rigide.",series:4,reps:"10-12",repos:"75s"},{nom:"Rowing haltère + squeeze omoplate",materiel:"1 haltère 10 kg + chaise",muscles:"Grand dorsal, rhomboïdes, trapèze moyen",posture:"Même technique qu'au mois 1 + marquer une pause 2 sec en haut en serrant fort l'omoplate. Cette pause augmente le recrutement musculaire sans ajouter de charge.",series:4,reps:"10 par bras",repos:"75s"},{nom:"Curl marteau haltères",materiel:"2 haltères 10 kg",muscles:"Brachial, biceps, avant-bras",posture:"Prise neutre (pouces vers le haut). Monter les haltères en gardant les coudes fixes le long du corps. Contrôler la descente 3 sec. Cible le brachial souvent négligé.",series:3,reps:"12",repos:"60s"},{nom:"Face pull W to Y",materiel:"Élastique Eric Flag bleu/jaune fixé à la barre",muscles:"Trapèzes, rhomboïdes, rotateurs externes",posture:"Tirer en W (coudes haut, mains vers le visage) puis ouvrir en Y (bras tendus en diagonale vers le haut). Contrôle total. Renforce la posture et prévient les douleurs cervicales.",series:3,reps:"12",repos:"60s"}]},{id:"D",jour:"SAMEDI",titre:"Full Body — Force & Densité",focus:"Corps entier · Super-sets · Moins de repos",couleur:"#8b3a1a",light:"#faeae6",warmup:["Jumping jacks × 45 secondes","Burpees modifiés sans saut × 8","Squats à vide × 20","Rotations bras tendus × 15"],exercices:[{nom:"Super-set : Squat SmartWorkout + Rowing anneaux",materiel:"Kit SmartWorkout + Anneaux bois",muscles:"Jambes + dos",posture:"Enchaîner sans repos : 10 squats SmartWorkout → 10 rowings aux anneaux. Repos 90s entre les super-sets. Maintien parfait du dos dans les deux exercices.",series:4,reps:"10 + 10",repos:"90s"},{nom:"Super-set : Pompes déclinées + Face pull",materiel:"Chaise + Élastique rouge/noir",muscles:"Pectoraux + arrière épaules",posture:"10 pompes pieds surélevés → 15 face pulls sans repos. Ce tandem poussée/tirage protège l'articulation de l'épaule. Repos 75s entre les tours.",series:3,reps:"10 + 15",repos:"75s"},{nom:"Tractions max + fente SmartWorkout",materiel:"Barre Eric Flag 2.0 + Kit SmartWorkout",muscles:"Corps entier",posture:"Max de tractions propres → directement 10 fentes par jambe avec barre SmartWorkout. Repos 120s. Enchaînement haut/bas pour maximiser le travail cardiovasculaire.",series:3,reps:"Max + 10 fentes",repos:"120s"},{nom:"Hip thrust SmartWorkout lourd",materiel:"Kit SmartWorkout + chaise",muscles:"Fessiers, ischios",posture:"Version plus lourde qu'au mardi : tension maximale à l'élastique SmartWorkout. Épaules sur la chaise, barre sur le bassin. 3 sec en position haute.",series:3,reps:"12",repos:"75s"},{nom:"Gainage complexe final",materiel:"Sol",muscles:"Core complet",posture:"40s planche avant → 25s planche latérale droite → 25s planche latérale gauche → retour 20s planche avant. Enchaîner sans pause. Fin de semaine — tu le mérites.",series:3,reps:"1 tour (110 sec)",repos:"90s"}]}];
+
+const TIPS=[{icon:"🔴",titre:"Lombaires fragiles",texte:"Toujours garder le dos NEUTRE. En cas de douleur, arrêter immédiatement. Le dead bug et le pallof press sont tes meilleurs alliés."},{icon:"💧",titre:"Hydratation",texte:"500 ml avant la séance, siroter pendant, 500 ml après. La déshydratation réduit la force de 10-15%."},{icon:"😴",titre:"Récupération",texte:"La croissance musculaire se fait pendant le repos. 7-8h de sommeil est non négociable."},{icon:"🍽️",titre:"Nutrition",texte:"Pour la prise de masse : 2g de protéines/kg soit ~152g/jour. Sources : œufs, poulet, fromage blanc, légumineuses."},{icon:"📈",titre:"Progression",texte:"Augmenter la résistance ou les reps dès que tu accomplis le maximum prévu 2 semaines de suite."},{icon:"🔵",titre:"Élastiques Eric Flag",texte:"Rouge/noir (5-16kg) = isolation. Bleu/jaune (12-32kg) = assistance mois 2. Bleu/blanc (25-65kg) = assistance mois 1."}];
+
+const COULEURS={A:{bg:"#1a3a5c",light:"#e8f0fa"},B:{bg:"#2e7d52",light:"#e6f4ec"},C:{bg:"#5a2d82",light:"#f0e8fa"},D:{bg:"#8b3a1a",light:"#faeae6"}};
+const SEANCE_IDS=["A","B","C","D"];
+const JOURS_LABELS=["Lun","Mar","Jeu","Sam"];
+const STORAGE_KEY="julien_workout_v1";
+
+function App(){
+  const [vue,setVue]=useState("programme");
+  const [mois,setMois]=useState(1);
+  const [seanceActive,setSeanceActive]=useState("A");
+  const [exOpen,setExOpen]=useState(null);
+  const [suiviSemaine,setSuiviSemaine]=useState(1);
+  const [suivi,setSuivi]=useState({});
+
+  useEffect(()=>{
+    try{const d=localStorage.getItem(STORAGE_KEY);if(d)setSuivi(JSON.parse(d));}catch(e){}
+  },[]);
+
+  useEffect(()=>{
+    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(suivi));}catch(e){}
+  },[suivi]);
+
+  const programme=mois===1?SEANCES_M1:SEANCES_M2;
+  const seance=programme.find(s=>s.id===seanceActive);
+  const c=COULEURS[seanceActive];
+
+  function getVal(sem,sid,ei,si){return suivi?.[sem]?.[sid]?.[ei]?.[si]||{done:false,reps:"",ressenti:0};}
+  function setVal(sem,sid,ei,si,patch){
+    setSuivi(prev=>{
+      const n=JSON.parse(JSON.stringify(prev||{}));
+      if(!n[sem])n[sem]={};if(!n[sem][sid])n[sem][sid]={};
+      if(!n[sem][sid][ei])n[sem][sid][ei]={};
+      if(!n[sem][sid][ei][si])n[sem][sid][ei][si]={done:false,reps:"",ressenti:0};
+      n[sem][sid][ei][si]={...n[sem][sid][ei][si],...patch};return n;
+    });
+  }
+  function pct(sem,sid){
+    const p=sem<=4?SEANCES_M1:SEANCES_M2;const s=p.find(x=>x.id===sid);if(!s)return 0;
+    let tot=0,done=0;s.exercices.forEach((ex,ei)=>{for(let si=0;si<ex.series;si++){tot++;if(getVal(sem,sid,ei,si).done)done++;}});
+    return tot===0?0:Math.round(done/tot*100);
+  }
+
+  const s=e=>({style:e});
+
+  return React.createElement("div",{style:{fontFamily:"'Segoe UI',system-ui,sans-serif",background:"#f0f0eb",minHeight:"100vh"}},
+    // HEADER
+    React.createElement("div",{style:{background:"#0f1f35",color:"white",paddingTop:"max(16px,env(safe-area-inset-top))"}},
+      React.createElement("div",{style:{padding:"12px 16px 0",maxWidth:700,margin:"0 auto"}},
+        React.createElement("div",{style:{fontSize:10,letterSpacing:3,textTransform:"uppercase",color:"#7a9bb5",marginBottom:2}},"Programme personnalisé"),
+        React.createElement("h1",{style:{fontSize:18,fontWeight:800,margin:"0 0 1px",letterSpacing:-0.5}},"Home Workout — 8 semaines"),
+        React.createElement("div",{style:{fontSize:11,color:"#7a9bb5",marginBottom:12}},"Julien · 38 ans · 1m83 · 76kg · Dos fragile · Prise de masse"),
+        // Nav tabs
+        React.createElement("div",{style:{display:"flex",gap:0}},
+          [["programme","📋 Programme"],["calendrier","📅 Suivi"],["conseils","💡 Conseils"]].map(([id,label])=>
+            React.createElement("button",{key:id,onClick:()=>setVue(id),style:{padding:"8px 12px",border:"none",background:"none",cursor:"pointer",color:vue===id?"white":"#7a9bb5",fontWeight:vue===id?700:400,fontSize:12,borderBottom:vue===id?"2px solid #4a9fd4":"2px solid transparent",transition:"all 0.15s"}},label)
+          )
+        )
+      )
+    ),
+
+    // ── PROGRAMME ──
+    vue==="programme"&&React.createElement("div",null,
+      React.createElement("div",{style:{background:"#0f1f35",padding:"10px 16px 14px"}},
+        React.createElement("div",{style:{maxWidth:700,margin:"0 auto",display:"flex",gap:8}},
+          [1,2].map(m=>React.createElement("button",{key:m,onClick:()=>{setMois(m);setSeanceActive("A");setExOpen(null);},style:{padding:"6px 16px",borderRadius:20,border:"none",cursor:"pointer",fontSize:12,fontWeight:700,background:mois===m?"#4a9fd4":"rgba(255,255,255,0.1)",color:mois===m?"white":"#7a9bb5"}},`MOIS ${m} — ${m===1?"Fondation":"Intensification"}`))
+        )
+      ),
+      // Séance tabs
+      React.createElement("div",{style:{background:"white",borderBottom:"2px solid #e8e8e0",overflowX:"auto"}},
+        React.createElement("div",{style:{maxWidth:700,margin:"0 auto",display:"flex"}},
+          programme.map(s=>React.createElement("button",{key:s.id,onClick:()=>{setSeanceActive(s.id);setExOpen(null);},style:{flex:1,padding:"10px 6px 8px",border:"none",background:"none",cursor:"pointer",borderBottom:seanceActive===s.id?`3px solid ${COULEURS[s.id].bg}`:"3px solid transparent",color:seanceActive===s.id?COULEURS[s.id].bg:"#888",fontWeight:seanceActive===s.id?800:500,fontSize:11,textTransform:"uppercase",minWidth:65}},
+            React.createElement("div",null,s.jour),
+            React.createElement("div",{style:{fontSize:9,marginTop:1,fontWeight:600}},`Séance ${s.id}`)
+          ))
+        )
+      ),
+      React.createElement("div",{style:{maxWidth:700,margin:"0 auto",padding:"0 14px 40px"}},
+        // Header séance
+        React.createElement("div",{style:{background:c.bg,color:"white",borderRadius:"0 0 12px 12px",padding:"13px 15px",marginBottom:12}},
+          React.createElement("div",{style:{fontSize:16,fontWeight:800}},seance.titre),
+          React.createElement("div",{style:{fontSize:11,color:"rgba(255,255,255,0.7)",marginTop:3}},seance.focus)
+        ),
+        // Warmup
+        React.createElement("div",{style:{background:"#fffbe6",border:"1px solid #f0d060",borderRadius:10,padding:12,marginBottom:12}},
+          React.createElement("div",{style:{fontSize:11,fontWeight:800,color:"#8a6000",textTransform:"uppercase",letterSpacing:1,marginBottom:7}},"🔥 Échauffement (5-7 min)"),
+          seance.warmup.map((w,i)=>React.createElement("div",{key:i,style:{fontSize:12,color:"#5a4000",padding:"3px 0",borderBottom:i<seance.warmup.length-1?"1px solid #f0d060":"none"}},`· ${w}`))
+        ),
+        React.createElement("div",{style:{fontSize:10,fontWeight:700,letterSpacing:2,color:"#888",textTransform:"uppercase",marginBottom:8}},`${seance.exercices.length} exercices`),
+        // Exercices
+        seance.exercices.map((ex,i)=>
+          React.createElement("div",{key:i,style:{background:"white",borderRadius:10,marginBottom:8,border:`1px solid ${exOpen===i?c.bg:"#e8e8e0"}`,overflow:"hidden"}},
+            React.createElement("div",{onClick:()=>setExOpen(exOpen===i?null:i),style:{display:"flex",alignItems:"center",padding:"11px 12px",cursor:"pointer",gap:10}},
+              React.createElement("div",{style:{width:27,height:27,borderRadius:"50%",background:c.bg,color:"white",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:800,flexShrink:0}},i+1),
+              React.createElement("div",{style:{flex:1}},
+                React.createElement("div",{style:{fontSize:13,fontWeight:700,color:"#1a1a1a"}},ex.nom),
+                React.createElement("div",{style:{fontSize:10,color:"#888",marginTop:1}},ex.muscles)
+              ),
+              React.createElement("div",{style:{display:"flex",gap:5,flexShrink:0,alignItems:"center"}},
+                React.createElement("span",{style:{background:c.light,color:c.bg,borderRadius:5,padding:"2px 7px",fontSize:11,fontWeight:700}},`${ex.series}×${ex.reps}`),
+                React.createElement("span",{style:{color:"#aaa",fontSize:13}},exOpen===i?"▲":"▼")
+              )
+            ),
+            exOpen===i&&React.createElement("div",{style:{borderTop:`1px solid ${c.light}`,background:c.light,padding:12}},
+              React.createElement("table",{style:{width:"100%",borderCollapse:"collapse",marginBottom:10}},
+                React.createElement("tbody",null,
+                  [["🏋️ Matériel",ex.materiel],["🔁 Séries × Reps",`${ex.series} × ${ex.reps}`],["⏱️ Repos",ex.repos]].map(([lbl,val])=>
+                    React.createElement("tr",{key:lbl,style:{borderBottom:"1px solid rgba(0,0,0,0.06)"}},
+                      React.createElement("td",{style:{padding:"5px 0",fontSize:11,fontWeight:700,color:c.bg,width:"38%"}},lbl),
+                      React.createElement("td",{style:{padding:"5px 0",fontSize:11,color:"#333"}},val)
+                    )
+                  )
+                )
+              ),
+              React.createElement("div",{style:{background:"white",borderRadius:7,padding:"9px 10px",borderLeft:`3px solid ${c.bg}`}},
+                React.createElement("div",{style:{fontSize:10,fontWeight:700,color:c.bg,marginBottom:4,textTransform:"uppercase",letterSpacing:0.5}},"📐 Posture & Technique"),
+                React.createElement("div",{style:{fontSize:12,color:"#333",lineHeight:1.6}},ex.posture)
+              )
+            )
+          )
+        )
+      )
+    ),
+
+    // ── SUIVI ──
+    vue==="calendrier"&&React.createElement("div",{style:{maxWidth:700,margin:"0 auto",padding:"14px 14px 40px"}},
+      React.createElement("div",{style:{fontSize:13,fontWeight:800,color:"#1a1a1a",marginBottom:3}},"Planning & Suivi de progression"),
+      React.createElement("div",{style:{fontSize:11,color:"#888",marginBottom:14}},"Coche tes séries. Tes données sont sauvegardées sur cet appareil."),
+      // Sélecteur semaines
+      React.createElement("div",{style:{display:"flex",gap:5,marginBottom:14,flexWrap:"wrap"}},
+        Array.from({length:8},(_,i)=>i+1).map(s=>{
+          const hasDone=SEANCE_IDS.some(sid=>pct(s,sid)>0);
+          const allDone=SEANCE_IDS.every(sid=>pct(s,sid)===100);
+          return React.createElement("button",{key:s,onClick:()=>setSuiviSemaine(s),style:{padding:"5px 11px",borderRadius:7,border:`1px solid ${suiviSemaine===s?"#0f1f35":"#ddd"}`,cursor:"pointer",background:suiviSemaine===s?"#0f1f35":allDone?"#2e7d52":hasDone?"#4a9fd4":"white",color:suiviSemaine===s||allDone||hasDone?"white":"#555",fontWeight:suiviSemaine===s?800:600,fontSize:12}},`S${s}${allDone?" ✓":""}`)
+        })
+      ),
+      // Séances de la semaine
+      React.createElement("div",{style:{background:"white",borderRadius:12,border:"1px solid #e8e8e0",overflow:"hidden",marginBottom:14}},
+        React.createElement("div",{style:{background:"#0f1f35",color:"white",padding:"9px 14px"}},
+          React.createElement("span",{style:{fontWeight:800,fontSize:13}},`Semaine ${suiviSemaine}`),
+          React.createElement("span",{style:{fontSize:11,color:"#7a9bb5",marginLeft:8}},`— Mois ${suiviSemaine<=4?1:2}`)
+        ),
+        SEANCE_IDS.map((sid,sIdx)=>{
+          const p=pct(suiviSemaine,sid);
+          const prog=suiviSemaine<=4?SEANCES_M1:SEANCES_M2;
+          const s=prog.find(x=>x.id===sid);
+          const cc=COULEURS[sid];
+          return React.createElement("div",{key:sid,style:{borderBottom:sIdx<3?"1px solid #f0f0eb":"none"}},
+            React.createElement("div",{style:{display:"flex",alignItems:"center",padding:"9px 14px",gap:10}},
+              React.createElement("div",{style:{width:30,height:30,borderRadius:7,background:cc.bg,color:"white",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",flexShrink:0}},
+                React.createElement("div",{style:{fontSize:8,fontWeight:700}},JOURS_LABELS[sIdx]),
+                React.createElement("div",{style:{fontSize:10,fontWeight:800}},sid)
+              ),
+              React.createElement("div",{style:{flex:1}},
+                React.createElement("div",{style:{fontSize:12,fontWeight:700,color:"#1a1a1a"}},s.titre.split("—")[0].trim()),
+                React.createElement("div",{style:{background:"#e8e8e0",borderRadius:3,height:5,marginTop:4}},
+                  React.createElement("div",{style:{background:p===100?"#2e7d52":cc.bg,width:`${p}%`,height:"100%",borderRadius:3,transition:"width 0.3s"}})
+                )
+              ),
+              React.createElement("div",{style:{fontSize:12,fontWeight:700,color:p===100?"#2e7d52":"#888",flexShrink:0}},p===100?"✓ 100%":`${p}%`)
+            ),
+            s.exercices.map((ex,ei)=>
+              React.createElement("div",{key:ei,style:{background:cc.light,margin:"0 10px 6px",borderRadius:8,padding:"8px 10px"}},
+                React.createElement("div",{style:{fontSize:11,fontWeight:700,color:cc.bg,marginBottom:6}},`${ei+1}. ${ex.nom}`),
+                React.createElement("div",{style:{display:"flex",gap:5,flexWrap:"wrap"}},
+                  Array.from({length:ex.series},(_,si)=>{
+                    const val=getVal(suiviSemaine,sid,ei,si);
+                    return React.createElement("div",{key:si,style:{background:val.done?cc.bg:"white",border:`1px solid ${cc.bg}`,borderRadius:6,padding:"4px 6px",minWidth:52,cursor:"pointer",transition:"all 0.15s"}},
+                      React.createElement("div",{onClick:()=>setVal(suiviSemaine,sid,ei,si,{done:!val.done}),style:{fontSize:10,fontWeight:700,color:val.done?"white":cc.bg,textAlign:"center",marginBottom:3}},`${val.done?"✓":"○"} S${si+1}`),
+                      React.createElement("input",{value:val.reps,onChange:e=>setVal(suiviSemaine,sid,ei,si,{reps:e.target.value}),placeholder:ex.reps,style:{width:"100%",border:"none",background:"transparent",fontSize:10,color:val.done?"white":"#555",textAlign:"center",outline:"none"}}),
+                      React.createElement("div",{style:{display:"flex",justifyContent:"center",gap:2,marginTop:2}},
+                        ["😓","💪","🔥"].map((em,ri)=>React.createElement("span",{key:ri,onClick:()=>setVal(suiviSemaine,sid,ei,si,{ressenti:ri+1}),style:{fontSize:10,opacity:val.ressenti===ri+1?1:0.3,cursor:"pointer"}},em))
+                      )
+                    );
+                  })
+                )
+              )
+            )
+          );
+        })
+      ),
+      // Grille globale
+      React.createElement("div",{style:{background:"white",borderRadius:12,border:"1px solid #e8e8e0",padding:14}},
+        React.createElement("div",{style:{fontSize:11,fontWeight:800,color:"#555",textTransform:"uppercase",letterSpacing:1,marginBottom:10}},"Vue globale — 8 semaines"),
+        React.createElement("div",{style:{display:"grid",gridTemplateColumns:"auto 1fr 1fr 1fr 1fr",gap:4}},
+          React.createElement("div",{style:{fontSize:10,color:"#aaa"}},""),
+          ...["Lun A","Mar B","Jeu C","Sam D"].map(j=>React.createElement("div",{key:j,style:{fontSize:10,fontWeight:700,color:"#888",textAlign:"center"}},j)),
+          ...Array.from({length:8},(_,wi)=>{
+            const s=wi+1;
+            return [
+              React.createElement("div",{key:`s${s}`,style:{fontSize:10,fontWeight:700,color:"#555",display:"flex",alignItems:"center"}},`S${s}`),
+              ...SEANCE_IDS.map(sid=>{
+                const p=pct(s,sid);const cc=COULEURS[sid];
+                return React.createElement("div",{key:sid,onClick:()=>setSuiviSemaine(s),style:{height:26,borderRadius:5,cursor:"pointer",background:p===0?"#f0f0eb":p===100?"#2e7d52":cc.bg,opacity:p===0?0.5:1,display:"flex",alignItems:"center",justifyContent:"center"}},
+                  React.createElement("span",{style:{fontSize:9,color:p===0?"#aaa":"white",fontWeight:700}},p===100?"✓":p>0?`${p}%`:"—")
+                );
+              })
+            ];
+          }).flat()
+        ),
+        React.createElement("div",{style:{display:"flex",gap:10,marginTop:10,flexWrap:"wrap"}},
+          [["#f0f0eb","Non fait"],["#4a9fd4","En cours"],["#2e7d52","Terminé"]].map(([color,label])=>
+            React.createElement("div",{key:label,style:{display:"flex",alignItems:"center",gap:4}},
+              React.createElement("div",{style:{width:11,height:11,borderRadius:3,background:color}}),
+              React.createElement("span",{style:{fontSize:10,color:"#888"}},label)
+            )
+          )
+        )
+      )
+    ),
+
+    // ── CONSEILS ──
+    vue==="conseils"&&React.createElement("div",{style:{maxWidth:700,margin:"0 auto",padding:"14px 14px 40px"}},
+      React.createElement("div",{style:{fontSize:13,fontWeight:800,color:"#1a1a1a",marginBottom:3}},"Conseils & Références"),
+      React.createElement("div",{style:{fontSize:11,color:"#888",marginBottom:14}},"Tout ce qu'il faut savoir pour progresser intelligemment."),
+      TIPS.map((t,i)=>React.createElement("div",{key:i,style:{background:"white",borderRadius:10,padding:"12px 14px",marginBottom:8,border:"1px solid #e8e8e0",display:"flex",gap:12}},
+        React.createElement("div",{style:{fontSize:20,flexShrink:0}},t.icon),
+        React.createElement("div",null,
+          React.createElement("div",{style:{fontSize:13,fontWeight:700,color:"#1a1a1a",marginBottom:3}},t.titre),
+          React.createElement("div",{style:{fontSize:12,color:"#555",lineHeight:1.5}},t.texte)
+        )
+      )),
+      React.createElement("div",{style:{background:"white",borderRadius:10,padding:14,border:"1px solid #e8e8e0",marginTop:4}},
+        React.createElement("div",{style:{fontSize:11,fontWeight:800,color:"#555",textTransform:"uppercase",letterSpacing:1,marginBottom:10}},"🔵 Guide élastiques Eric Flag"),
+        [{couleur:"#e74c3c",nom:"Rouge/Noir",resistance:"5-16 kg",usage:"Face pull, curl biceps, développé épaules, isolation"},{couleur:"#3498db",nom:"Bleu/Jaune",resistance:"12-32 kg",usage:"Assistance tractions mois 2, exercices modérés"},{couleur:"#1a6ba0",nom:"Bleu/Blanc",resistance:"25-65 kg",usage:"Assistance tractions mois 1 (fort allègement)"}].map((e,i)=>
+          React.createElement("div",{key:i,style:{display:"flex",gap:10,padding:"7px 0",borderBottom:i<2?"1px solid #f0f0eb":"none",alignItems:"flex-start"}},
+            React.createElement("div",{style:{width:11,height:11,borderRadius:"50%",background:e.couleur,flexShrink:0,marginTop:2}}),
+            React.createElement("div",null,
+              React.createElement("div",{style:{fontSize:12,fontWeight:700,color:"#1a1a1a"}},`${e.nom} — ${e.resistance}`),
+              React.createElement("div",{style:{fontSize:11,color:"#666",marginTop:1}},e.usage)
+            )
+          )
+        )
+      ),
+      React.createElement("div",{style:{background:"white",borderRadius:10,padding:14,border:"1px solid #e8e8e0",marginTop:8}},
+        React.createElement("div",{style:{fontSize:11,fontWeight:800,color:"#555",textTransform:"uppercase",letterSpacing:1,marginBottom:10}},"📊 Objectifs à 8 semaines"),
+        [{label:"Tractions",depart:"5 reps",objectif:"8-10 reps sans assistance"},{label:"Dips",depart:"10 reps",objectif:"15 reps ou lestés"},{label:"Pompes",depart:"25 reps",objectif:"4×15 pieds surélevés"},{label:"Planche",depart:"1 min",objectif:"Complexe 110 sec (avant+côtés)"}].map((o,i)=>
+          React.createElement("div",{key:i,style:{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:i<3?"1px solid #f0f0eb":"none",alignItems:"center"}},
+            React.createElement("span",{style:{fontSize:12,fontWeight:700,color:"#333",width:"30%"}},o.label),
+            React.createElement("span",{style:{fontSize:11,color:"#888"}},o.depart),
+            React.createElement("span",{style:{fontSize:11,color:"#888"}},"→"),
+            React.createElement("span",{style:{fontSize:11,color:"#2e7d52",fontWeight:700,textAlign:"right",width:"45%"}},o.objectif)
+          )
+        )
+      )
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>
